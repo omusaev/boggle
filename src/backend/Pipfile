@@ -9,6 +9,7 @@ verify_ssl = true
 flask = "*"
 flask_restful = "*"
 gunicorn = "*"
+python-json-logger = "*"
 
 [requires]
 python_version = "3.6"
