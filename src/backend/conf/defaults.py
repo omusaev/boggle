@@ -9,3 +9,7 @@ FLASK = dict(
     FILE_STORAGE='/tmp/file_storage',
     DEBUG=False
 )
+
+DATABASE = {
+    'sqlalchemy.url': "sqlite:///{}/data/boggle.db".format(ROOT_DIR)
+}
