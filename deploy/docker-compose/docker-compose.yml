@@ -1,0 +1,13 @@
+version: '3'
+services:
+  app:
+    image: boggle-backend:latest
+    build:
+      context: ${PWD-.}/../../
+      dockerfile: ${PWD-.}/../images/backend/Dockerfile
+    environment:
+      - GUNICORN_CMD_ARGS="--reload"
+    volumes:
+      - ${PWD-.}/../../src/backend/:/app/
+    ports:
+      - "8080:8080"
