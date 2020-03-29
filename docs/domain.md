@@ -1,14 +1,16 @@
 # Domain Model
 ## Main Entities
 
-**Combination**
+**BoardCombination**
 - id
 - letters
+- created_at
 
-**Game Session**
+**Game**
 - id
-- combination_id
-- started_at
+- uuid
+- board_combination_id
+- created__at
 - player_name
 - found_words
-- score
+- final_score
