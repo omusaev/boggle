@@ -5,11 +5,14 @@ RUN apk add --no-cache --virtual .build-deps \
 
 RUN pip install pipenv
 
-ADD ./src/backend /app
 ADD ./deploy/images/backend/gunicorn.conf.py /conf/
+ADD ./deploy/images/backend/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ADD ./src/backend /app
 
 WORKDIR /app
 
 RUN pipenv install --system
 
-CMD ["gunicorn", "-c", "/conf/gunicorn.conf.py", "app:app"]
+ENTRYPOINT ["/entrypoint.sh"]
