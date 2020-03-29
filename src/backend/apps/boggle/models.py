@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy import (
-    Column, BigInteger, DateTime, Integer, String, ForeignKey
+    Column, DateTime, Integer, String, ForeignKey
 )
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship, backref
@@ -13,7 +13,7 @@ class BoardCombination(Base):
 
     __tablename__ = 'board_combination'
 
-    id = Column(BigInteger, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     letters = Column(JSON)
     created_at = Column(DateTime, default=datetime.datetime.now)
 
@@ -24,7 +24,7 @@ class Game(Base):
 
     __tablename__ = 'game'
 
-    id = Column(BigInteger, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     uuid = Column(String(32), nullable=False, unique=True,
                   default=generate_uuid)
     player_name = Column(String(64), nullable=True)
@@ -33,7 +33,7 @@ class Game(Base):
     created_at = Column(DateTime, default=datetime.datetime.now)
 
     board_combination_id = Column(
-        BigInteger,
+        Integer,
         ForeignKey(
             BoardCombination.id,
             use_alter=True,
