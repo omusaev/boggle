@@ -1,4 +1,18 @@
-from flask_restful import Resource
+from flask_restful import Resource, reqparse, fields, marshal_with
+
+new_game_parser = reqparse.RequestParser(bundle_errors=True)
+new_game_parser.add_argument('player_name', required=False)
+new_game_parser.add_argument('combination_id', required=False)
+
+new_game_fields = {
+    'uuid': fields.String,
+    'combination_id': fields.String,
+    'letters': fields.List(fields.String),
+    'player_name': fields.String,
+    'started_at': fields.String,
+    'found_words': fields.List(fields.String),
+    'final_score': fields.Integer,
+}
 
 
 class Game(Resource):
@@ -15,5 +29,29 @@ class Game(Resource):
 
 class GameList(Resource):
 
+    @marshal_with(new_game_fields)
     def post(self):
-        return {}, 201
+        args = new_game_parser.parse_args()
+
+        player_name = args.get('player_name')
+        combination_id = args.get('combination_id')
+
+        if combination_id:
+            # TODO: get from db, raise an error if doesn't exist
+            pass
+        else:
+            # TODO: generate a new combination, insert into DB
+            pass
+
+        # TODO: create a new game, insert into DB
+        game = {
+            'uuid': '',
+            'combination_id': combination_id,
+            'letters': [],
+            'player_name': player_name,
+            'started_at': '',
+            'found_words': [],
+            'final_score': 123
+        }
+
+        return game, 201
