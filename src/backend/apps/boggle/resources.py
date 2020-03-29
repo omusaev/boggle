@@ -1,4 +1,4 @@
-from flask_restful import Resource, reqparse, fields, marshal_with
+from flask_restful import Resource, reqparse, fields, marshal_with, abort
 
 from apps.boggle.board import CombinationGenerator
 from apps.boggle.models import BoardCombination
@@ -43,8 +43,14 @@ class GameList(Resource):
         combination_id = args.get('combination_id')
 
         if combination_id:
-            # TODO: get from db, raise an error if doesn't exist
-            pass
+            combination = BoardCombination.query.get(combination_id)
+
+            if not combination:
+                abort(
+                    400,
+                    error_message='Combination with id {} does not exist'.
+                    format(combination_id)
+                )
         else:
             letters = CombinationGenerator().new()
             combination = BoardCombination(letters=letters)
