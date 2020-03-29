@@ -10,32 +10,20 @@ new_game_parser = reqparse.RequestParser(bundle_errors=True)
 new_game_parser.add_argument('player_name', required=False)
 new_game_parser.add_argument('combination_id', required=False)
 
-new_game_fields = {
+game_fields = {
     'uuid': fields.String,
-    'combination_id': fields.String,
-    'letters': fields.List(fields.String),
+    'combination_id': fields.String(attribute='board_combination.id'),
+    'letters': fields.List(fields.String, attribute='board_combination.letters'),
     'player_name': fields.String,
-    'created_at': fields.String,
+    'created_at': fields.DateTime(dt_format='rfc822'),
     'found_words': fields.List(fields.String),
     'final_score': fields.Integer,
 }
 
 
-class GameResource(Resource):
-
-    def get(self, game_uuid):
-        return {}
-
-    def delete(self, game_uuid):
-        return '', 204
-
-    def put(self, game_uuid):
-        return {}, 201
-
-
 class GameListResource(Resource):
 
-    @marshal_with(new_game_fields)
+    @marshal_with(game_fields)
     def post(self):
         args = new_game_parser.parse_args()
 
@@ -49,7 +37,7 @@ class GameListResource(Resource):
                 abort(
                     400,
                     error_message='Combination with id {} does not exist'.
-                    format(combination_id)
+                                  format(combination_id)
                 )
         else:
             letters = CombinationGenerator().new()
@@ -67,14 +55,34 @@ class GameListResource(Resource):
         add_data(combination)
         commit_data()
 
-        game = {
-            'uuid': new_game.uuid,
-            'combination_id': combination.id,
-            'letters': combination.letters,
-            'player_name': new_game.player_name,
-            'created_at': new_game.created_at,
-            'found_words': new_game.found_words,
-            'final_score': new_game.final_score
-        }
+        return new_game, 201
 
-        return game, 201
+
+class GameResource(Resource):
+
+    def _get_game_or_abort(self, game_uuid):
+        game = Game.query.filter_by(uuid=game_uuid).first()
+
+        if not game:
+            abort(
+                400,
+                error_message='Game with uuid {} does not exist'.
+                    format(game_uuid)
+            )
+
+        return game
+
+    @marshal_with(game_fields)
+    def get(self, game_uuid):
+        game = self._get_game_or_abort(game_uuid)
+
+        return game
+
+    def delete(self, game_uuid):
+        Game.query.filter_by(uuid=game_uuid).delete()
+        commit_data()
+
+        return '', 204
+
+    def put(self, game_uuid):
+        return {}, 201

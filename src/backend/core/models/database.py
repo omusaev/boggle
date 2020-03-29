@@ -50,27 +50,33 @@ def init_db(config: Dict):
     return __db_engine
 
 
-def add_data(data) -> None:
+def add_data(data, commit=False) -> None:
     """Adds data to the database.
 
     Adds the data given as sqlalchemy data object to the session and then
     commits the changes. In effect this saves the changes to the database.
 
     :param data: The sqlalchemy data object to add.
+    :param commit: Commit changes to the database.
     """
     db_session.add(data)
-    db_session.commit()
+
+    if commit:
+        db_session.commit()
 
 
-def delete_data(data) -> None:
+def delete_data(data, commit=False) -> None:
     """Delete data from the database.
 
     Mark given data as deleted and commit changes to the database.
 
     :param data: The sqlalchemy data object to add.
+    :param commit: Commit changes to the database.
     """
     db_session.delete(data)
-    db_session.commit()
+
+    if commit:
+        db_session.commit()
 
 
 def commit_data() -> None:
