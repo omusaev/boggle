@@ -1,6 +1,6 @@
 - project structure skeleton +
 - backend project bootstrap +
-- define domain entities and DB scheme
+- define domain entities and DB scheme + 
 - define API endpoints
 - new board generation
 - word validation (really exists on the board; present in a dictionary)
