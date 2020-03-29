@@ -1,5 +1,8 @@
 from flask_restful import Resource, reqparse, fields, marshal_with
 
+from apps.boggle.board import CombinationGenerator
+
+
 new_game_parser = reqparse.RequestParser(bundle_errors=True)
 new_game_parser.add_argument('player_name', required=False)
 new_game_parser.add_argument('combination_id', required=False)
@@ -40,14 +43,14 @@ class GameList(Resource):
             # TODO: get from db, raise an error if doesn't exist
             pass
         else:
-            # TODO: generate a new combination, insert into DB
-            pass
+            # TODO: insert into DB
+            letters = CombinationGenerator().new()
 
         # TODO: create a new game, insert into DB
         game = {
             'uuid': '',
             'combination_id': combination_id,
-            'letters': [],
+            'letters': letters,
             'player_name': player_name,
             'started_at': '',
             'found_words': [],
