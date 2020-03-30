@@ -19,6 +19,7 @@ new_word_parser.add_argument('word', required=True)
 word_fields = {
     'word': fields.String,
     'score': fields.Integer,
+    'path': fields.List(fields.Integer)
 }
 
 game_fields = {
@@ -110,13 +111,14 @@ class GameResource(Resource):
         # TODO: add dictionary validator
 
         try:
-            rules_validator.validate(new_word)
+            path = rules_validator.validate(new_word)
+            print(path)
         except WordRulesValidatorException as e:
             abort(400, error_message=str(e))
 
         score = WordScoreCalculator().calc(new_word)
 
-        game.found_words += [{'word': new_word, 'score': score}]
+        game.found_words += [{'word': new_word, 'score': score, 'path': path}]
         game.final_score += score
 
         add_data(game, commit=True)

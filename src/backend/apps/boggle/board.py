@@ -62,10 +62,14 @@ class WordRulesValidator:
             may include singular and plural (or other derived forms)
             separately, but may not use the same letter cube more than once per
             word
+
+            If the word is valid return first found valid path on the board
         """
 
         self._check_length(word)
-        self._check_sequence(word)
+        path = self._check_sequence(word)
+
+        return path
 
     def _check_length(self, word):
         word_length = len(word)
@@ -106,12 +110,12 @@ class WordRulesValidator:
         if letter != rest[0]:
             return False
 
+        # ok, we're on the right path
+        stack.append(pos)
+
         # this is the last letter - found!
         if len(rest) == 1:
             return True
-
-        # ok, let's go deeper
-        stack.add((x, y))
 
         for neighbor in self._find_neighbors(pos):
 
@@ -124,27 +128,37 @@ class WordRulesValidator:
             if found:
                 return True
 
+        stack.pop()
+
         return False
 
     def _check_sequence(self, word):
+        """
+            Checks whether the word is on the board and returns first found
+            valid path (indexes)
+        """
+
         # first step is to find where the word begins. Since there might be
         # multiple options let's iterate over all possible start points
         # and check the sequence
 
         first_letter = word[0]
-        start_points = [i for i, letter in enumerate(self.combination) if letter == first_letter]
+        start_points = [
+            i for i, l in enumerate(self.combination) if l == first_letter
+        ]
 
         for index in start_points:
             y = index // self.board_size
             x = index % self.board_size
             pos = (x, y)
 
-            stack = {pos}
+            stack = [pos]
             for neighbor in self._find_neighbors(pos):
                 found = self._find_path(stack, neighbor, word[1:])
 
                 if found:
-                    return True
+                    # now let's go back to indexes
+                    return [y * self.board_size + x for (x,y) in stack]
 
         raise WordRulesValidatorException(
             'The word is not present on the board'
