@@ -5,6 +5,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.mutable import MutableList
 
 from core.models.base import Base, generate_uuid
 
@@ -28,7 +29,7 @@ class Game(Base):
     uuid = Column(String(32), nullable=False, unique=True,
                   default=generate_uuid)
     player_name = Column(String(64), nullable=True)
-    found_words = Column(JSON)
+    found_words = Column(MutableList.as_mutable(JSON))
     final_score = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.now)
 

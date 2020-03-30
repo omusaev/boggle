@@ -2,9 +2,11 @@
 - backend project bootstrap +
 - define domain entities and DB scheme +
 - define API endpoints +
-- new board generation
-- word validation (really exists on the board; present in a dictionary)
-- final score
+- new board generation +
+- word validation (really exists on the board) +
+- final score +
+- word validation (present in a dictionary)
+- word validation (the game is not expired)
 - unit tests for the backend
 - functional tests for the backend
 
