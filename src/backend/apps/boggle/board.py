@@ -23,6 +23,8 @@ class CombinationGenerator:
         self.cubes = cubes if cubes is not None else self.DEFAULT_CUBES
         self.board_size = board_size if board_size is not None else self.DEFAULT_BOARD_SIZE
 
+        assert len(self.cubes) >= self.board_size ** 2
+
     def new(self):
         number_of_cubes = self.board_size ** 2
 
@@ -50,6 +52,8 @@ class WordRulesValidator:
         self.combination = combination
         self.min_length = min_length if min_length is not None else self.DEFAULT_MIN_LENGTH
         self.board_size = board_size if board_size is not None else self.DEFAULT_BOARD_SIZE
+
+        assert len(self.combination) == self.board_size ** 2
 
     def validate(self, word):
         """
@@ -110,6 +114,10 @@ class WordRulesValidator:
         if letter != rest[0]:
             return False
 
+        # this cube is already used
+        if pos in stack:
+            return False
+
         # ok, we're on the right path
         stack.append(pos)
 
@@ -152,13 +160,12 @@ class WordRulesValidator:
             x = index % self.board_size
             pos = (x, y)
 
-            stack = [pos]
-            for neighbor in self._find_neighbors(pos):
-                found = self._find_path(stack, neighbor, word[1:])
+            stack = []
+            found = self._find_path(stack, pos, word)
 
-                if found:
-                    # now let's go back to indexes
-                    return [y * self.board_size + x for (x,y) in stack]
+            if found:
+                # now let's go back to indexes
+                return [y * self.board_size + x for (x, y) in stack]
 
         raise WordRulesValidatorException(
             'The word is not present on the board'
@@ -200,12 +207,12 @@ class Dictionary:
 
     def _load_dictionary(self):
         with open(self.dictionary_path, 'r') as file:
-            self._words = set(file.read().split())
+            return set(file.read().split())
 
     @property
     def words(self):
         if self._words is None:
-            self._load_dictionary()
+            self._words = self._load_dictionary()
 
         return self._words
 

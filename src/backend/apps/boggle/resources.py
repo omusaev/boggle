@@ -124,7 +124,7 @@ class GameResource(Resource):
 
         add_data(game, commit=True)
 
-        return game, 200
+        return game, 201
 
     def _validate_new_word_and_abort_if_invalid(self, game, new_word):
         if new_word in (word['word'] for word in game.found_words):

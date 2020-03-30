@@ -8,3 +8,9 @@ The app is Docker friendly, so here we go:
 $ cd deploy/docker-compose
 $ docker-compose up
 ```
+
+# Tests
+```bash
+$ cd deploy/docker-compose
+$ docker-compose -f docker-compose.test.yml up
+```
