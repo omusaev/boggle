@@ -13,8 +13,8 @@ init_db(settings.DATABASE)
 app = Flask(__name__)
 api = Api(app)
 
-api.add_resource(GameListResource, '/games')
-api.add_resource(GameResource, '/games/<game_uuid>')
+api.add_resource(GameListResource, '/api/v1/games')
+api.add_resource(GameResource, '/api/v1/games/<game_uuid>')
 
 
 if __name__ == '__main__':
