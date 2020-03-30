@@ -55,6 +55,10 @@ LOGGERS = {
         'handlers': ['console'],
         'level': LOGGING_LEVEL,
     },
+    # 'sqlalchemy': {
+    #     'handlers': ['console'],
+    #     'level': LOGGING_LEVEL,
+    # },
 }
 
 LOGGING = {

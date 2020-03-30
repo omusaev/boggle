@@ -4,7 +4,8 @@ from flask_restful import Resource, reqparse, fields, marshal_with, abort
 
 from apps.boggle.board import (
     CombinationGenerator, WordRulesValidator, WordRulesValidatorException,
-    WordScoreCalculator
+    WordScoreCalculator, Dictionary, WordDictionaryValidator,
+    WordDictionaryValidatorException
 )
 from apps.boggle.models import BoardCombination, Game
 
@@ -108,22 +109,13 @@ class GameResource(Resource):
 
         # TODO: definitely not the best way to check if the game has expired
         # considering the delays and network latency there might be +-2 seconds
-        # difference. It's good enough for a casual game though so here we go :)
+        # difference. It's good enough for a casual game though so here we go
         elapsed = datetime.datetime.now() - game.created_at
 
         if elapsed > datetime.timedelta(seconds=settings.GAME_TTL):
             abort(400, error_message='The game is finished')
 
-        if new_word in (word['word'] for word in game.found_words):
-            abort(400, error_message='The word has been added already')
-
-        rules_validator = WordRulesValidator(game.board_combination.letters)
-        # TODO: add dictionary validator
-
-        try:
-            path = rules_validator.validate(new_word)
-        except WordRulesValidatorException as e:
-            abort(400, error_message=str(e))
+        path = self._validate_new_word_and_abort_if_invalid(game, new_word)
 
         score = WordScoreCalculator().calc(new_word)
 
@@ -133,3 +125,24 @@ class GameResource(Resource):
         add_data(game, commit=True)
 
         return game, 200
+
+    def _validate_new_word_and_abort_if_invalid(self, game, new_word):
+        if new_word in (word['word'] for word in game.found_words):
+            abort(400, error_message='The word has been added already')
+
+        rules_validator = WordRulesValidator(game.board_combination.letters)
+
+        try:
+            path = rules_validator.validate(new_word)
+        except WordRulesValidatorException as e:
+            abort(400, error_message=str(e))
+
+        dictionary = Dictionary(settings.BOGGLE_DICTIONARY_PATH)
+        dictionary_validator = WordDictionaryValidator(dictionary)
+
+        try:
+            dictionary_validator.validate(new_word)
+        except WordDictionaryValidatorException as e:
+            abort(400, error_message=str(e))
+
+        return path

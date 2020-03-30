@@ -188,3 +188,44 @@ class WordScoreCalculator:
         # if there is no key in the table just assume the word is longer than
         # the max defined in the table
         return self.score_table.get(len(word), max(self.score_table.values()))
+
+
+class Dictionary:
+
+    dictionary_path = None
+    _words = None
+
+    def __init__(self, dictionary_path):
+        self.dictionary_path = dictionary_path
+
+    def _load_dictionary(self):
+        with open(self.dictionary_path, 'r') as file:
+            self._words = set(file.read().split())
+
+    @property
+    def words(self):
+        if self._words is None:
+            self._load_dictionary()
+
+        return self._words
+
+    def word_exists(self, word):
+        return word in self.words
+
+
+class WordDictionaryValidatorException(Exception):
+    pass
+
+
+class WordDictionaryValidator:
+
+    dictionary = None
+
+    def __init__(self, dictionary):
+        self.dictionary = dictionary
+
+    def validate(self, word):
+        if not self.dictionary.word_exists(word):
+            raise WordDictionaryValidatorException(
+                'The word does no exist'
+            )

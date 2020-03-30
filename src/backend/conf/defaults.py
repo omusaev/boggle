@@ -15,3 +15,6 @@ DATABASE = {
 }
 
 GAME_TTL = 3 * 60  # 180 sec
+BOGGLE_DICTIONARY_PATH = os.path.join(
+    ROOT_DIR, 'apps/boggle/dictionary/collins_scrabble_words.txt'
+)
