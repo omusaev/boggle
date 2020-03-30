@@ -13,3 +13,5 @@ FLASK = dict(
 DATABASE = {
     'sqlalchemy.url': "sqlite:///{}/data/boggle.db".format(ROOT_DIR)
 }
+
+GAME_TTL = 3 * 60  # 180 sec
