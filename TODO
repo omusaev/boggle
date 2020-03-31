@@ -10,21 +10,14 @@
 - unit tests for the backend +
 - functional tests for the backend +
 
-- frontend project bootstrap
-- get a new board from the API
-- test markup structure
-- word validation (really exists on the board)
-- submit valid words and display score/error message
-- timer
-- identification
-- game results (board stats/other users)
+- frontend project bootstrap +
+- define a set of components
+- base markup and logic
+- nice styles
 - tests
-- UI design
-- markup and styles
 
 - CI/CD bootstrap
 
-- API documentation
 - setup instructions
 
 - performance tests
