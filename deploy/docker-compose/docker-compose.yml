@@ -1,6 +1,6 @@
 version: '3'
 services:
-  app:
+  backend:
     image: boggle-backend:latest
     build:
       context: ${PWD-.}/../../
@@ -11,3 +11,15 @@ services:
       - ${PWD-.}/../../src/backend/:/app/
     ports:
       - "8080:8080"
+  frontend:
+    image: boggle-frontend:latest
+    build:
+      context: ${PWD-.}/../../
+      dockerfile: ${PWD-.}/../images/frontend/Dockerfile
+    command: ["yarn", "start"]
+    stdin_open: true
+    volumes:
+      - ${PWD-.}/../../src/frontend/:/app/
+      - /app/node_modules
+    ports:
+      - "3000:3000"
