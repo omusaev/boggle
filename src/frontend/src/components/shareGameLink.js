@@ -12,7 +12,6 @@ class ShareGameLink extends React.Component {
 
         return (
             <Box>
-                Challenge your friends with this combination!
                 <TextField
                     fullWidth
                     value={shareLink}

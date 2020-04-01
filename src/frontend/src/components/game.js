@@ -24,6 +24,7 @@ class Game extends React.Component {
             <Container>
                 <Box>
                     <Board
+                        gameInProcess={gameInProcess}
                         letters={letters}
                         onDiceClick={onDiceClick}
                     />

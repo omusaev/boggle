@@ -7,6 +7,7 @@ class Board extends React.Component {
     render() {
         const letters = this.props.letters;
         const onDiceClick = this.props.onDiceClick;
+        const gameInProcess = this.props.gameInProcess;
 
         const numberOfCols = 4;
 
@@ -22,6 +23,7 @@ class Board extends React.Component {
                 <BoardRow
                     letters={rowLetters}
                     onDiceClick={onDiceClick}
+                    gameInProcess={gameInProcess}
                 />
             </Box>
         );
