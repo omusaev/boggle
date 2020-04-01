@@ -1,7 +1,10 @@
 FROM python:3.6-alpine
 
 RUN apk add --no-cache --virtual .build-deps \
-    gcc
+    gcc \
+    python3-dev \
+    musl-dev \
+    postgresql-dev
 
 RUN pip install pipenv
 

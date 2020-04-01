@@ -1,5 +1,13 @@
 version: '3'
 services:
+  database:
+    image: postgres
+    environment:
+      - POSTGRES_USER=boggle
+      - POSTGRES_PASSWORD=boggle
+      - POSTGRES_DB=boggle
+    volumes:
+      - /var/lib/postgresql/data/
   backend:
     image: boggle-backend:latest
     build:
@@ -7,8 +15,11 @@ services:
       dockerfile: ${PWD-.}/../images/backend/Dockerfile
     environment:
       - APP_ENVIRONMENT_NAME=production
+      - DB_CONNECTION_URL=postgresql://boggle:boggle@database:5432/boggle
     ports:
       - "8080:8080"
+    depends_on:
+      - database
   frontend:
     image: boggle-frontend:latest
     build:
