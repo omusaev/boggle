@@ -16,7 +16,7 @@ class GameStart extends React.Component {
                         inputProps={{style: { textAlign: 'center' }}}
                         placeholder="Enter your name"
                         disabled={gameInProcess}
-                        onChange={event => onPlayerNameUpdate(event)}
+                        onChange={onPlayerNameUpdate}
                     />
                 </Box>
                 <Box display="flex" justifyContent="center" pt={2}>

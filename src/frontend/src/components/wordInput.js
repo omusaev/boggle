@@ -17,12 +17,17 @@ class WordInput extends React.Component {
                         onChange={(event) => onUpdate(event)}
                         value={currentWord}
                         disabled={!gameInProcess}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter'){
+                                onSubmit()
+                            }
+                        }}
                     />
                 </Box>
                 <Box display="inline">
                     <Button
                         type="button"
-                        onClick={() => onSubmit()}
+                        onClick={onSubmit}
                         disabled={!gameInProcess}
                     >
                         Submit
