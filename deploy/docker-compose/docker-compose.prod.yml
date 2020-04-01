@@ -1,0 +1,28 @@
+version: '3'
+services:
+  backend:
+    image: boggle-backend:latest
+    build:
+      context: ${PWD-.}/../../
+      dockerfile: ${PWD-.}/../images/backend/Dockerfile
+    environment:
+      - APP_ENVIRONMENT_NAME=production
+    ports:
+      - "8080:8080"
+  frontend:
+    image: boggle-frontend:latest
+    build:
+      context: ${PWD-.}/../../
+      dockerfile: ${PWD-.}/../images/frontend/Dockerfile
+    ports:
+      - "3000:3000"
+  nginx:
+    image: boggle-nginx:latest
+    build:
+      context: ${PWD-.}/../../
+      dockerfile: ${PWD-.}/../images/nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
