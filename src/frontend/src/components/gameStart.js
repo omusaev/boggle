@@ -22,20 +22,20 @@ class GameStart extends React.Component {
                     fullWidth
                 >
                     {isChallenge &&
-                        <Button
-                            type="button"
-                            onClick={() => onStartGame(true)}
-                            disabled={gameInProcess}
-                        >
-                                Accept challenge
-                        </Button>
+                    <Button
+                        type="button"
+                        onClick={() => onStartGame(true)}
+                        disabled={gameInProcess}
+                    >
+                        Accept challenge
+                    </Button>
                     }
                     <Button
                         type="button"
                         onClick={() => onStartGame(false)}
                         disabled={gameInProcess}
                     >
-                            New game
+                        New game
                     </Button>
                 </ButtonGroup>
             </Container>

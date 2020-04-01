@@ -70,15 +70,15 @@ class App extends React.Component {
 
     startTimer() {
         if (this.timer === 0) {
-          this.timer = setInterval(this.countDown, 1000);
+            this.timer = setInterval(this.countDown, 1000);
         }
     }
 
     countDown() {
         let seconds = this.state.secondsLeft - 1;
         this.setState({
-          time: this.secondsToTime(seconds),
-          secondsLeft: seconds,
+            time: this.secondsToTime(seconds),
+            secondsLeft: seconds,
         });
 
         if (seconds === 0) {

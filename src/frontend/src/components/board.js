@@ -14,7 +14,7 @@ class Board extends React.Component {
         let i, j;
 
         for (i = 0, j = letters.length; i < j; i += numberOfCols) {
-             rows.push(letters.slice(i , i + numberOfCols));
+            rows.push(letters.slice(i, i + numberOfCols));
         }
 
         const boardRows = rows.map((rowLetters, i) =>
