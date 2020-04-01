@@ -11,9 +11,9 @@
 - functional tests for the backend +
 
 - frontend project bootstrap +
-- define a set of components
-- base markup and logic
-- nice styles
+- define a set of components +
+- base markup and logic +
+- nice styles +
 - tests
 
 - CI/CD bootstrap
