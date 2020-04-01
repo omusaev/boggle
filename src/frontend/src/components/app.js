@@ -195,7 +195,8 @@ class App extends React.Component {
                     message: {
                         isError: true,
                         text: data.error_message
-                    }
+                    },
+                    currentWord: ''
                 })
             });
     }
