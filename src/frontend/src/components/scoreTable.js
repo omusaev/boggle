@@ -1,32 +1,32 @@
 import React from 'react';
-import {Container, List, ListItem} from "@material-ui/core";
+import {Box, List, ListItem} from "@material-ui/core";
 
 
 class ScoreTable extends React.Component {
     render() {
         const foundWords = this.props.foundWords;
-        const finalScore = this.props.finalScore;
 
         const rows = foundWords.map((word, i) =>
             <ListItem
                 key={i}
             >
-                {word.word} ({word.score})
+                <Box display="flex" justifyContent="center">
+                    <Box width={30}>
+                      ({word.score})
+                    </Box>
+                    <Box>
+                        {word.word}
+                    </Box>
+                </Box>
             </ListItem>
         );
 
         return (
-            <Container>
-
+            <Box>
                 <List>
-                    <ListItem
-                        key="finalScore"
-                    >
-                        Score: {finalScore}
-                    </ListItem>
                     {rows}
                 </List>
-            </Container>
+            </Box>
         );
     }
 }

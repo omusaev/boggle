@@ -3,7 +3,8 @@ import datetime
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
 
 from apps.boggle.board import (
-    CombinationGenerator, WordRulesValidator, WordRulesValidatorException,
+    CombinationGenerator, WordRulesValidator,
+    WordRulesValidatorLengthException, WordRulesValidatorSequenceException,
     WordScoreCalculator, Dictionary, WordDictionaryValidator,
     WordDictionaryValidatorException
 )
@@ -41,6 +42,17 @@ game_fields = {
 }
 
 
+class ErrorCodes:
+    COMBINATION_DOES_NOT_EXIST = 'COMBINATION_DOES_NOT_EXIST'
+    GAME_DOES_NOT_EXIST = 'GAME_DOES_NOT_EXIST'
+    GAME_IS_FINISHED = 'GAME_IS_FINISHED'
+    WORD_HAS_BEEN_ADDED_ALREADY = 'WORD_HAS_BEEN_ADDED_ALREADY'
+
+    INCORRECT_LENGTH = 'INCORRECT_LENGTH'
+    INCORRECT_SEQUENCE = 'INCORRECT_SEQUENCE'
+    WORD_DOES_NOT_EXIST = 'WORD_DOES_NOT_EXIST'
+
+
 class GameListResource(Resource):
 
     @marshal_with(game_fields)
@@ -59,7 +71,8 @@ class GameListResource(Resource):
                 abort(
                     400,
                     error_message='Combination with id {} does not exist'.
-                                  format(combination_id)
+                                  format(combination_id),
+                    error_code=ErrorCodes.COMBINATION_DOES_NOT_EXIST
                 )
         else:
             letters = CombinationGenerator().new()
@@ -89,7 +102,8 @@ class GameResource(Resource):
             abort(
                 400,
                 error_message='Game with uuid {} does not exist'.
-                    format(game_uuid)
+                    format(game_uuid),
+                error_code=ErrorCodes.GAME_DOES_NOT_EXIST
             )
 
         return game
@@ -119,7 +133,11 @@ class GameResource(Resource):
         elapsed = datetime.datetime.now() - game.created_at
 
         if elapsed > datetime.timedelta(seconds=settings.GAME_TTL):
-            abort(400, error_message='The game is finished')
+            abort(
+                400,
+                error_message='The game is finished',
+                error_code=ErrorCodes.GAME_IS_FINISHED
+            )
 
         path = self._validate_new_word_and_abort_if_invalid(game, new_word)
 
@@ -134,14 +152,28 @@ class GameResource(Resource):
 
     def _validate_new_word_and_abort_if_invalid(self, game, new_word):
         if new_word in (word['word'] for word in game.found_words):
-            abort(400, error_message='The word has been added already')
+            abort(
+                400,
+                error_message='The word has been added already',
+                error_code=ErrorCodes.WORD_HAS_BEEN_ADDED_ALREADY
+            )
 
         rules_validator = WordRulesValidator(game.board_combination.letters)
 
         try:
             path = rules_validator.validate(new_word)
-        except WordRulesValidatorException as e:
-            abort(400, error_message=str(e))
+        except WordRulesValidatorLengthException as e:
+            abort(
+                400,
+                error_message=str(e),
+                error_code=ErrorCodes.INCORRECT_LENGTH
+            )
+        except WordRulesValidatorSequenceException as e:
+            abort(
+                400,
+                error_message=str(e),
+                error_code=ErrorCodes.INCORRECT_SEQUENCE
+            )
 
         dictionary = Dictionary(settings.BOGGLE_DICTIONARY_PATH)
         dictionary_validator = WordDictionaryValidator(dictionary)
@@ -149,6 +181,10 @@ class GameResource(Resource):
         try:
             dictionary_validator.validate(new_word)
         except WordDictionaryValidatorException as e:
-            abort(400, error_message=str(e))
+            abort(
+                400,
+                error_message=str(e),
+                error_code=ErrorCodes.WORD_DOES_NOT_EXIST
+            )
 
         return path

@@ -1,5 +1,5 @@
 import React from 'react';
-import {ButtonGroup, Button} from "@material-ui/core";
+import {Box, Button} from "@material-ui/core";
 
 
 class BoardRow extends React.Component {
@@ -9,11 +9,12 @@ class BoardRow extends React.Component {
         const onDiceClick = this.props.onDiceClick;
         const gameInProcess = this.props.gameInProcess;
 
-        const dices = letters.map((letter, i) =>
+        const dice = letters.map((letter, i) =>
             <Button
                 key={i}
                 size="large"
                 type="button"
+                variant="outlined"
                 disabled={!gameInProcess}
                 onClick={() => onDiceClick(letter)}
             >
@@ -22,11 +23,9 @@ class BoardRow extends React.Component {
         );
 
         return (
-            <ButtonGroup
-                fullWidth
-            >
-                {dices}
-            </ButtonGroup>
+            <Box display="flex" justifyContent="center">
+                {dice}
+            </Box>
         );
     }
 }

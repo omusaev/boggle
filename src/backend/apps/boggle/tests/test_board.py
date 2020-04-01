@@ -2,7 +2,8 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from apps.boggle.board import (
-    CombinationGenerator, WordRulesValidatorException, WordRulesValidator,
+    CombinationGenerator, WordRulesValidator,
+    WordRulesValidatorLengthException, WordRulesValidatorSequenceException,
     WordScoreCalculator, Dictionary, WordDictionaryValidatorException,
     WordDictionaryValidator
 )
@@ -72,13 +73,13 @@ class TestWordRulesValidator(TestCase):
     def test_if_check_length_checks_min_length(self):
         word = 'a' * (self.validator.min_length - 1)
 
-        with self.assertRaises(WordRulesValidatorException):
+        with self.assertRaises(WordRulesValidatorLengthException):
             self.validator._check_length(word)
 
     def test_if_check_length_checks_max_length(self):
         word = 'a' * (self.validator.board_size ** 2 + 1)
 
-        with self.assertRaises(WordRulesValidatorException):
+        with self.assertRaises(WordRulesValidatorLengthException):
             self.validator._check_length(word)
 
     def test_if_find_neighbors_returns_all_neighbors(self):
@@ -262,7 +263,7 @@ class TestWordRulesValidator(TestCase):
         word = 'OA'
 
         with patch.object(self.validator, '_find_path', return_value=False) as mocked:
-            with self.assertRaises(WordRulesValidatorException):
+            with self.assertRaises(WordRulesValidatorSequenceException):
                 self.validator._check_sequence(word)
 
 

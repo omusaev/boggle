@@ -1,5 +1,5 @@
 import React from 'react';
-import {Container, TextField, Box, Button} from "@material-ui/core";
+import {TextField, Box, Button} from "@material-ui/core";
 
 class WordInput extends React.Component {
     render() {
@@ -9,16 +9,17 @@ class WordInput extends React.Component {
         const onSubmit = this.props.onSubmit;
 
         return (
-            <Container>
-                <Box component="div" display="inline">
+            <Box>
+                <Box display="inline">
                     <TextField
+                        inputProps={{style: { textAlign: 'center' }}}
                         placeholder="Enter word"
                         onChange={(event) => onUpdate(event)}
                         value={currentWord}
                         disabled={!gameInProcess}
                     />
                 </Box>
-                <Box component="div" display="inline">
+                <Box display="inline">
                     <Button
                         type="button"
                         onClick={() => onSubmit()}
@@ -27,7 +28,7 @@ class WordInput extends React.Component {
                         Submit
                     </Button>
                 </Box>
-            </Container>
+            </Box>
         );
     }
 }

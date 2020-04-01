@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, TextField} from "@material-ui/core";
+import {Box, TextField, Typography} from "@material-ui/core";
 
 
 class ShareGameLink extends React.Component {
@@ -12,9 +12,16 @@ class ShareGameLink extends React.Component {
 
         return (
             <Box>
+                <Box pb={1} pl={1}>
+                    <Typography variant="overline">
+                      Challenge a friend with this board!
+                    </Typography>
+                </Box>
                 <TextField
+                    variant="outlined"
                     fullWidth
                     value={shareLink}
+                    inputProps={{style: { textAlign: 'center' }}}
                     InputProps={{
                         readOnly: true,
                     }}

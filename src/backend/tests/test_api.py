@@ -143,7 +143,8 @@ class TestApi(TestCase):
         )
 
         expected_data = {
-            'error_message': 'The word is not present on the board'
+            'error_message': 'The word is not present on the board',
+            'error_code': 'INCORRECT_SEQUENCE'
         }
 
         self.assertDictEqual(expected_data, actual_data)
@@ -161,7 +162,8 @@ class TestApi(TestCase):
         )
 
         expected_data = {
-            'error_message': 'The word does no exist'
+            'error_message': 'The word does no exist',
+            'error_code': 'WORD_DOES_NOT_EXIST'
         }
 
         self.assertDictEqual(expected_data, actual_data)
@@ -185,7 +187,8 @@ class TestApi(TestCase):
         )
 
         expected_data = {
-            'error_message': 'The word has been added already'
+            'error_message': 'The word has been added already',
+            'error_code': 'WORD_HAS_BEEN_ADDED_ALREADY'
         }
 
         self.assertDictEqual(expected_data, actual_data)
@@ -205,7 +208,8 @@ class TestApi(TestCase):
             )
 
         expected_data = {
-            'error_message': 'The game is finished'
+            'error_message': 'The game is finished',
+            'error_code': 'GAME_IS_FINISHED'
         }
 
         self.assertDictEqual(expected_data, actual_data)

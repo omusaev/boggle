@@ -1,11 +1,12 @@
 import React from 'react';
-import {Container, Box} from "@material-ui/core";
+import {Box} from "@material-ui/core";
 
 import Board from './board';
-import Timer from './timer';
+import GameInfo from './gameInfo';
 import Message from './message';
 import WordInput from './wordInput';
 import ScoreTable from './scoreTable';
+
 
 class Game extends React.Component {
     render() {
@@ -21,7 +22,7 @@ class Game extends React.Component {
         const gameInProcess = this.props.gameInProcess;
 
         return (
-            <Container>
+            <Box>
                 <Box>
                     <Board
                         gameInProcess={gameInProcess}
@@ -30,24 +31,34 @@ class Game extends React.Component {
                     />
                 </Box>
                 <Box>
-                    <Timer
+                    <GameInfo
                         time={time}
+                        finalScore={finalScore}
                     />
                 </Box>
-                <Message
-                    message={message}
-                />
-                <WordInput
-                    gameInProcess={gameInProcess}
-                    currentWord={currentWord}
-                    onUpdate={onCurrentWordUpdate}
-                    onSubmit={onNewWordSubmit}
-                />
-                <ScoreTable
-                    foundWords={foundWords}
-                    finalScore={finalScore}
-                />
-            </Container>
+                <Box display="flex" justifyContent="center">
+                    <Box width={1/2}>
+                        <Message
+                            message={message}
+                        />
+                    </Box>
+                </Box>
+                <Box display="flex" justifyContent="center" pt={3}>
+                    <WordInput
+                        gameInProcess={gameInProcess}
+                        currentWord={currentWord}
+                        onUpdate={onCurrentWordUpdate}
+                        onSubmit={onNewWordSubmit}
+                    />
+                </Box>
+                <Box display="flex" justifyContent="center" pt={3}>
+                    <Box>
+                        <ScoreTable
+                            foundWords={foundWords}
+                        />
+                    </Box>
+                </Box>
+            </Box>
         );
     }
 }

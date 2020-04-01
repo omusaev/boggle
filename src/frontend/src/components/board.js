@@ -1,5 +1,5 @@
 import React from 'react';
-import {Container, Box} from "@material-ui/core";
+import {Box} from "@material-ui/core";
 import BoardRow from "./boardRow"
 
 
@@ -29,9 +29,9 @@ class Board extends React.Component {
         );
 
         return (
-            <Container>
+            <Box>
                 {boardRows}
-            </Container>
+            </Box>
         );
     }
 }

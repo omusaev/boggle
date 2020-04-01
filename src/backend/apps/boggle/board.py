@@ -39,6 +39,14 @@ class WordRulesValidatorException(Exception):
     pass
 
 
+class WordRulesValidatorLengthException(Exception):
+    pass
+
+
+class WordRulesValidatorSequenceException(Exception):
+    pass
+
+
 class WordRulesValidator:
 
     DEFAULT_MIN_LENGTH = 3
@@ -80,7 +88,7 @@ class WordRulesValidator:
         max_length = self.board_size ** 2
 
         if word_length < self.min_length or word_length > max_length:
-            raise WordRulesValidatorException(
+            raise WordRulesValidatorLengthException(
                 'Length must be between {} and {}'.format(self.min_length,
                                                           max_length)
             )
@@ -167,7 +175,7 @@ class WordRulesValidator:
                 # now let's go back to indexes
                 return [y * self.board_size + x for (x, y) in stack]
 
-        raise WordRulesValidatorException(
+        raise WordRulesValidatorSequenceException(
             'The word is not present on the board'
         )
 

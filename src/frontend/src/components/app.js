@@ -1,24 +1,40 @@
 import React from 'react';
-import {Container, Divider} from "@material-ui/core";
+import {Box, Container, Divider} from "@material-ui/core";
 
 import '../styles/app.css';
+
+import apiClient from "../core/apiClient";
+import settings from '../conf/settings'
 
 import GameStart from './gameStart';
 import Game from './game';
 import ShareGameLink from './shareGameLink';
-
-import apiClient from "../core/apiClient";
 
 
 class App extends React.Component {
     constructor(props) {
         super(props);
 
+        this.gameTtl = settings.gameTtl;
+        this.siteUrl = settings.siteUrl;
+        this.combinaionIfParam = 'c';
+
+        this.errorMessages = {
+            'COMBINATION_DOES_NOT_EXIST': 'The combination does not exist',
+            'GAME_DOES_NOT_EXIST': 'The game does not exist',
+            'GAME_IS_FINISHED': 'The game is finished',
+            'WORD_HAS_BEEN_ADDED_ALREADY': 'Got it already!',
+            'INCORRECT_LENGTH': 'Minimum length is 3 letters!',
+            'INCORRECT_SEQUENCE': 'Hmm, don\'t see it on the board',
+            'WORD_DOES_NOT_EXIST': 'The word does not exist!',
+        };
+
         const urlParams = new URLSearchParams(props.location.search);
-        const combination_id = urlParams.get('combination_id');
+        const combination_id = urlParams.get(this.combinaionIfParam);
 
         this.state = {
             gameInProcess: false,
+            gameFinished: false,
             playerName: '',
             isChallenge: !!combination_id,
             combinationId: combination_id,
@@ -104,6 +120,7 @@ class App extends React.Component {
     finishGame() {
         this.setState({
             gameInProcess: false,
+            gameFinished: true,
             currentWord: '',
             message: {
                 isError: false,
@@ -113,8 +130,7 @@ class App extends React.Component {
     }
 
     buildShareLink(combinationId) {
-        // TODO: get base url from settings
-        return window.location.protocol + '//' + window.location.host + window.location.pathname + '?combination_id=' + combinationId
+        return `${this.siteUrl}?${this.combinaionIfParam}=${combinationId}`
     }
 
     handleGameStart(acceptChallenge) {
@@ -140,8 +156,9 @@ class App extends React.Component {
                 const shareLink = this.buildShareLink(data.combination_id);
 
                 this.setState({
-                    secondsLeft: 3 * 60,  // TODO: to settings
+                    secondsLeft: this.gameTtl,
                     gameInProcess: true,
+                    gameFinished: false,
                     combinationId: data.combination_id,
                     uuid: data.uuid,
                     letters: data.letters,
@@ -194,7 +211,7 @@ class App extends React.Component {
                 this.setState({
                     message: {
                         isError: true,
-                        text: data.error_message
+                        text: this.errorMessages[data.error_code] || data.error_message
                     },
                     currentWord: ''
                 })
@@ -205,6 +222,7 @@ class App extends React.Component {
         const isChallenge = this.state.isChallenge;
         const shareLink = this.state.shareLink;
         const gameInProcess = this.state.gameInProcess;
+        const gameFinished = this.state.gameFinished;
         const letters = this.state.letters;
         const time = this.state.time;
         const foundWords = this.state.foundWords;
@@ -214,28 +232,40 @@ class App extends React.Component {
 
         return (
             <Container maxWidth="sm">
-                <GameStart
-                    gameInProcess={gameInProcess}
-                    isChallenge={isChallenge}
-                    onStartGame={this.handleGameStart}
-                    onPlayerNameUpdate={this.updatePlayerName}
-                />
-                <Divider/>
-                <Game
-                    gameInProcess={gameInProcess}
-                    letters={letters}
-                    time={time}
-                    foundWords={foundWords}
-                    finalScore={finalScore}
-                    onCurrentWordUpdate={this.updateCurrentWord}
-                    onNewWordSubmit={this.handleNewWord}
-                    message={message}
-                    currentWord={currentWord}
-                    onDiceClick={this.onDiceClick}
-                />
-                <ShareGameLink
-                    shareLink={shareLink}
-                />
+                <Box pt={5}>
+                    <Box pb={2}>
+                        <GameStart
+                            gameInProcess={gameInProcess}
+                            isChallenge={isChallenge}
+                            onStartGame={this.handleGameStart}
+                            onPlayerNameUpdate={this.updatePlayerName}
+                        />
+                    </Box>
+                    {(gameFinished || gameInProcess) && <Divider variant="middle"/>}
+                    <Box pt={2}>
+                        {(gameFinished || gameInProcess) && <Game
+                            gameInProcess={gameInProcess}
+                            letters={letters}
+                            time={time}
+                            foundWords={foundWords}
+                            finalScore={finalScore}
+                            onCurrentWordUpdate={this.updateCurrentWord}
+                            onNewWordSubmit={this.handleNewWord}
+                            message={message}
+                            currentWord={currentWord}
+                            onDiceClick={this.onDiceClick}
+                        />
+                        }
+                    </Box>
+                    {(gameFinished || gameInProcess) && <Divider variant="middle"/> }
+                    <Box display="flex" justifyContent="center" pt={2}>
+                        <Box width={1/2}>
+                            <ShareGameLink
+                            shareLink={shareLink}
+                        />
+                        </Box>
+                    </Box>
+                </Box>
             </Container>
         );
     }
