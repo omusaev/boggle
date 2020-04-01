@@ -25,6 +25,9 @@ services:
     build:
       context: ${PWD-.}/../../
       dockerfile: ${PWD-.}/../images/frontend/Dockerfile
+      args:
+        apiBaseUrl: http://127.0.0.1/api/v1
+        siteUrl: http://127.0.0.1/
     ports:
       - "3000:3000"
   nginx:
