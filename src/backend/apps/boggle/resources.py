@@ -12,6 +12,10 @@ from apps.boggle.models import BoardCombination, Game
 from core.models.database import add_data, commit_data
 from conf import settings
 
+from logging import getLogger
+
+logger = getLogger(__name__)
+
 
 new_game_parser = reqparse.RequestParser(bundle_errors=True)
 new_game_parser.add_argument('player_name', required=False)
@@ -45,6 +49,8 @@ class GameListResource(Resource):
 
         player_name = args.get('player_name')
         combination_id = args.get('combination_id')
+
+        logger.debug('Received request for a new game with args: %s', args)
 
         if combination_id:
             combination = BoardCombination.query.get(combination_id)
