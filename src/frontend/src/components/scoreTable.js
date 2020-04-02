@@ -12,7 +12,7 @@ class ScoreTable extends React.Component {
             >
                 <Box display="flex" justifyContent="center">
                     <Box width={30}>
-                      ({word.score})
+                        ({word.score})
                     </Box>
                     <Box>
                         {word.word}

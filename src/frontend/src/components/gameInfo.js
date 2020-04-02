@@ -13,7 +13,7 @@ class GameInfo extends React.Component {
                     {time.minutes}:{time.seconds}
                 </Box>
                 <Box p={2}>
-                  {finalScore}
+                    {finalScore}
                 </Box>
             </Box>
         );

@@ -12,13 +12,13 @@ class WordInput extends React.Component {
             <Box>
                 <Box display="inline">
                     <TextField
-                        inputProps={{style: { textAlign: 'center' }}}
+                        inputProps={{style: {textAlign: 'center'}}}
                         placeholder="Enter word"
                         onChange={(event) => onUpdate(event)}
                         value={currentWord}
                         disabled={!gameInProcess}
                         onKeyPress={(e) => {
-                            if (e.key === 'Enter'){
+                            if (e.key === 'Enter') {
                                 onSubmit()
                             }
                         }}

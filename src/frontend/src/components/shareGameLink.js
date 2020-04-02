@@ -14,17 +14,19 @@ class ShareGameLink extends React.Component {
             <Box>
                 <Box pb={1} pl={1}>
                     <Typography variant="overline">
-                      Challenge a friend with this board!
+                        Challenge a friend with this board!
                     </Typography>
                 </Box>
                 <TextField
                     variant="outlined"
                     fullWidth
                     value={shareLink}
-                    inputProps={{style: { textAlign: 'center' }}}
-                    InputProps={{
-                        readOnly: true,
-                    }}
+                    inputProps={
+                        {
+                            style: {textAlign: 'center'},
+                            readOnly: true
+                        }
+                    }
                 />
             </Box>
         )

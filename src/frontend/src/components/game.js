@@ -37,7 +37,7 @@ class Game extends React.Component {
                     />
                 </Box>
                 <Box display="flex" justifyContent="center">
-                    <Box width={1/2}>
+                    <Box width={1 / 2}>
                         <Message
                             message={message}
                         />

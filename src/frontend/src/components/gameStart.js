@@ -13,7 +13,7 @@ class GameStart extends React.Component {
             <Box>
                 <Box display="flex" justifyContent="center">
                     <TextField
-                        inputProps={{style: { textAlign: 'center' }}}
+                        inputProps={{style: {textAlign: 'center'}}}
                         placeholder="Enter your name"
                         disabled={gameInProcess}
                         onChange={onPlayerNameUpdate}
