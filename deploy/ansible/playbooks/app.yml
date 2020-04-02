@@ -1,0 +1,43 @@
+---
+- hosts: all
+  gather_facts: yes
+
+  vars:
+    HOME: "{{ ansible_env.HOME }}"
+    REPO_ROOT: "{{ playbook_dir }}/../../../"
+
+  tasks:
+    - name: Create src dir
+      file:
+        path: "{{ HOME }}/src"
+        state: directory
+
+    - name: Copy src files
+      synchronize:
+        src: "{{ REPO_ROOT }}/src/"
+        dest: "{{ HOME }}/src"
+
+    - name: Create deploy dir
+      file:
+        path: "{{ HOME }}/deploy"
+        state: directory
+
+    - name: Copy docker images
+      synchronize:
+        src: "{{ REPO_ROOT }}/deploy/images"
+        dest: "{{ HOME }}/deploy"
+
+    - name: Copy dockerignore
+      synchronize:
+        src: "{{ REPO_ROOT }}/.dockerignore"
+        dest: "{{ HOME }}/.dockerignore"
+
+    - name: Copy docker-compose files
+      synchronize:
+        src: "{{ REPO_ROOT }}/deploy/docker-compose"
+        dest: "{{ HOME }}/deploy"
+
+    - name: Start app
+      command: "{{ HOME }}/bin/docker-compose -f docker-compose.prod.yml up -d"
+      args:
+        chdir: "{{ HOME }}/deploy/docker-compose"

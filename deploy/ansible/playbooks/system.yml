@@ -1,0 +1,43 @@
+---
+- hosts: all
+  gather_facts: yes
+
+  vars:
+    HOME: "{{ ansible_env.HOME }}"
+    REPO_ROOT: "{{ playbook_dir }}/../../../"
+
+  tasks:
+    - name: Install system packages
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+      vars:
+        packages:
+          - apt-transport-https
+          - software-properties-common
+          - python-pip
+          - ca-certificates
+          - docker.io
+      become: yes
+
+    - name: Create bin dir
+      file:
+        path: "{{ HOME }}/bin"
+        state: directory
+
+    - name: Install docker compose
+      command: curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-Linux-x86_64" -o {{HOME}}/bin/docker-compose
+
+    - name: Chmod docker-compose
+      command: chmod +x {{HOME}}/bin/docker-compose
+
+    - name: Enable and start docker service
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+      become: yes
+
+    - name: Add user to docker group
+      command: usermod -aG docker ubuntu
+      become: yes
