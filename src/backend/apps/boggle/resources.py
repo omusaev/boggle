@@ -107,7 +107,8 @@ class GameListResource(Resource):
         args = games_list_parser.parse_args()
         combination_id = args['combination_id']
 
-        games = Game.query.filter_by(board_combination_id=combination_id).all()
+        games = Game.query.filter_by(board_combination_id=combination_id).\
+            order_by(Game.final_score.desc()).all()
 
         return {'games': games}
 
