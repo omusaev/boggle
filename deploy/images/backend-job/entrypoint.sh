@@ -7,6 +7,6 @@ export PYTHONPATH="$APP_DIR"
 
 # TODO: wait-for-it.sh
 # rabbitmq is slow, just wait a bit
-sleep 10
+sleep 15
 
 python3 "$APP_DIR/job.py"

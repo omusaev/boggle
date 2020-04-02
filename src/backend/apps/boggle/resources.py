@@ -184,17 +184,16 @@ class GameResource(Resource):
         if game.board_combination.words:
             word = game.board_combination.words.get(new_word)
 
-            # if it's not there the only possible reason is that the sequence
-            # is invalid
-            if not word:
-                abort(400, error_code=ErrorCodes.INCORRECT_SEQUENCE)
+            if word:
+                logger.debug('Found the word in combination.words')
+                return word['path']
 
-            logger.debug('Found the word in combination.words')
-            return word['path']
-
-        # ok, background solver is still working, let's check the word
-        # ourselves
-        sequence_validator = WordSequenceValidator(game.board_combination.letters)
+        # ok, background solver is still working or the word hasn't been found
+        # by it. If it's not in the combination.words it's either a fake word
+        # or does not exist on the board, so we have to check both here
+        sequence_validator = WordSequenceValidator(
+            game.board_combination.letters
+        )
 
         try:
             path = sequence_validator.validate(new_word)

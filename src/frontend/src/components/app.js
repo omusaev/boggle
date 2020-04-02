@@ -15,6 +15,7 @@ import GameStart from './gameStart';
 import Game from './game';
 import ShareGameLink from './shareGameLink';
 import ScoreBoard from './scoreBoard';
+import CombinationWords from './combinationWords';
 
 
 class App extends React.Component {
@@ -48,6 +49,7 @@ class App extends React.Component {
             gameId: '',
             letters: [],
             foundWords: [],
+            combinationWords: [],
             finalScore: 0,
             time: {
                 minutes: 0,
@@ -155,6 +157,20 @@ class App extends React.Component {
                     scoreBoard: data.games
                 });
             })
+
+        apiClient(
+            {
+                method: 'get',
+                path:  `combinations/${combinationId}`,
+            }
+        )
+            .then(response => {
+                const data = response.data;
+
+                this.setState({
+                    combinationWords: data.words
+                });
+            })
     }
 
     buildShareLink(combinationId) {
@@ -258,6 +274,7 @@ class App extends React.Component {
         const message = this.state.message;
         const currentWord = this.state.currentWord;
         const scoreBoard = this.state.scoreBoard;
+        const combinationWords = this.state.combinationWords;
 
         return (
             <Container maxWidth="sm">
@@ -301,6 +318,19 @@ class App extends React.Component {
                                 <ExpansionPanelDetails>
                                     <ScoreBoard
                                         games={scoreBoard}
+                                    />
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                            <ExpansionPanel>
+                                <ExpansionPanelSummary
+                                    aria-controls="allwords-content"
+                                    id="allwords-header"
+                                >
+                                    <Typography>All possible words</Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails>
+                                    <CombinationWords
+                                        words={combinationWords}
                                     />
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
