@@ -4,31 +4,29 @@ import settings from '../conf/settings'
 const API_BASE_URL = settings.apiBaseUrl;
 
 
-const apiClient = async (method, path, data, params, options, headers) => {
+const apiClient = async ({method, path, data, params, options, headers}) => {
     // remove leading slash from path
     if (path.substring(0, 1) === '/') {
         path = path.substring(1, path.length);
     }
 
-    let jsonHeaders = {
+    let defaultHeaders = {
         'Accept': 'application/json'
     };
 
     if (method === 'post') {
-        jsonHeaders['Content-Type'] = 'application/json;charset=UTF-8'
+        defaultHeaders['Content-Type'] = 'application/json;charset=UTF-8'
     }
 
-    // axios request options
-    let config = {
+    const config = {
         url: `${API_BASE_URL}/${path}`,
         method: method,
         data: data,
         params: params,
         ...options,
-        headers: Object.assign(headers || {}, jsonHeaders)
+        headers: Object.assign(headers || {}, defaultHeaders)
     };
 
-    // send API request
     return await axios(config);
 };
 

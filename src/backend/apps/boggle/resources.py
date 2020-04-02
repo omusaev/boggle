@@ -25,6 +25,9 @@ new_game_parser.add_argument('combination_id', required=False)
 new_word_parser = reqparse.RequestParser(bundle_errors=True)
 new_word_parser.add_argument('word', required=True)
 
+games_list_parser = reqparse.RequestParser(bundle_errors=True)
+games_list_parser.add_argument('combination_id', required=True)
+
 word_fields = {
     'word': fields.String,
     'score': fields.Integer,
@@ -39,6 +42,13 @@ game_fields = {
     'created_at': fields.DateTime(dt_format='rfc822'),
     'found_words': fields.List(fields.Nested(word_fields)),
     'final_score': fields.Integer,
+}
+
+games_list_fields = {
+    'games': fields.List(fields.Nested({
+        'player_name': fields.String,
+        'final_score': fields.Integer,
+    }))
 }
 
 
@@ -91,6 +101,15 @@ class GameListResource(Resource):
         commit_data()
 
         return new_game, 201
+
+    @marshal_with(games_list_fields)
+    def get(self):
+        args = games_list_parser.parse_args()
+        combination_id = args['combination_id']
+
+        games = Game.query.filter_by(board_combination_id=combination_id).all()
+
+        return {'games': games}
 
 
 class GameResource(Resource):

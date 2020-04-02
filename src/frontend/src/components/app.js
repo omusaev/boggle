@@ -1,5 +1,10 @@
 import React from 'react';
-import {Box, Container, Divider} from "@material-ui/core";
+import {
+    Box, Container, Divider,
+    ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails,
+    Typography
+} from "@material-ui/core";
+
 
 import '../styles/app.css';
 
@@ -9,6 +14,7 @@ import settings from '../conf/settings'
 import GameStart from './gameStart';
 import Game from './game';
 import ShareGameLink from './shareGameLink';
+import ScoreBoard from './scoreBoard';
 
 
 class App extends React.Component {
@@ -52,7 +58,8 @@ class App extends React.Component {
             message: {
                 isError: false,
                 text: ''
-            }
+            },
+            scoreBoard: []
         };
 
         this.timer = 0;
@@ -118,6 +125,8 @@ class App extends React.Component {
     }
 
     finishGame() {
+        const combinationId = this.state.combinationId;
+
         this.setState({
             gameInProcess: false,
             gameFinished: true,
@@ -127,6 +136,25 @@ class App extends React.Component {
                 text: "Time's up!"
             }
         });
+
+        const params = {
+            'combination_id': combinationId
+        };
+
+        apiClient(
+            {
+                method: 'get',
+                path: 'games',
+                params: params
+            }
+        )
+            .then(response => {
+                const data = response.data;
+
+                this.setState({
+                    scoreBoard: data.games
+                });
+            })
     }
 
     buildShareLink(combinationId) {
@@ -145,11 +173,11 @@ class App extends React.Component {
             data['combination_id'] = combinationId
         }
 
-        apiClient(
-            'post',
-            'games',
-            data
-        )
+        apiClient({
+            method: 'post',
+            path: 'games',
+            data: data
+        })
             .then(response => {
                 const data = response.data;
 
@@ -188,11 +216,11 @@ class App extends React.Component {
             word: currentWord
         };
 
-        apiClient(
-            'post',
-            `games/${gameUuid}`,
-            data
-        )
+        apiClient({
+            method: 'post',
+            path: `games/${gameUuid}`,
+            data: data
+        })
             .then(response => {
                 const data = response.data;
 
@@ -229,6 +257,7 @@ class App extends React.Component {
         const finalScore = this.state.finalScore;
         const message = this.state.message;
         const currentWord = this.state.currentWord;
+        const scoreBoard = this.state.scoreBoard;
 
         return (
             <Container maxWidth="sm">
@@ -241,7 +270,8 @@ class App extends React.Component {
                             onPlayerNameUpdate={this.updatePlayerName}
                         />
                     </Box>
-                    {(gameFinished || gameInProcess) && <Divider variant="middle"/>}
+                    {(gameFinished || gameInProcess) &&
+                    <Divider variant="middle"/>}
                     <Box pt={2}>
                         {(gameFinished || gameInProcess) && <Game
                             gameInProcess={gameInProcess}
@@ -257,12 +287,33 @@ class App extends React.Component {
                         />
                         }
                     </Box>
-                    {(gameFinished || gameInProcess) && <Divider variant="middle"/> }
+                    {gameFinished && <Divider variant="middle"/>}
+                    {gameFinished &&
+                    <Box display="flex" justifyContent="center" pt={2} pb={2}>
+                        <Box width={1 / 2}>
+                            <ExpansionPanel>
+                                <ExpansionPanelSummary
+                                    aria-controls="scoreboard-content"
+                                    id="scoreboard-header"
+                                >
+                                    <Typography>Score Board</Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails>
+                                    <ScoreBoard
+                                        games={scoreBoard}
+                                    />
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                        </Box>
+                    </Box>
+                    }
+                    {(gameFinished || gameInProcess) &&
+                    <Divider variant="middle"/>}
                     <Box display="flex" justifyContent="center" pt={2}>
-                        <Box width={1/2}>
+                        <Box width={1 / 2}>
                             <ShareGameLink
-                            shareLink={shareLink}
-                        />
+                                shareLink={shareLink}
+                            />
                         </Box>
                     </Box>
                 </Box>

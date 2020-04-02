@@ -38,10 +38,17 @@ class TestApi(TestCase):
         self.generator_patcher.stop()
 
     def _request(self, url, method, data):
+
+        kwargs = {}
+
+        if method in ('post',):
+            data = json.dumps(data)
+            kwargs['content_type'] = 'application/json'
+
         response = getattr(self.app, method)(
             url,
-            data=json.dumps(data),
-            content_type='application/json'
+            data=data,
+            **kwargs
         )
 
         data = json.loads(response.get_data().decode())
@@ -214,3 +221,32 @@ class TestApi(TestCase):
 
         self.assertDictEqual(expected_data, actual_data)
         self.assertEqual(response.status_code, 400)
+
+    def test_if_games_list_response_format_is_correct(self):
+        _, first_game = self._create_game()
+
+        _, second_game = self._create_game(
+            combination_id=first_game['combination_id']
+        )
+
+        response, actual_data = self._request(
+            '/api/v1/games',
+            'get',
+            {'combination_id': first_game['combination_id']}
+        )
+
+        expected_data = {
+            'games': [
+                {
+                    'player_name': first_game['player_name'],
+                    'final_score': first_game['final_score'],
+                },
+                {
+                    'player_name': second_game['player_name'],
+                    'final_score': second_game['final_score'],
+                }
+            ]
+        }
+
+        self.assertDictEqual(expected_data, actual_data)
+        self.assertEqual(response.status_code, 200)
