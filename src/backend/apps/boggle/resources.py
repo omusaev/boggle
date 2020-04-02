@@ -147,6 +147,8 @@ class GameResource(Resource):
 
         game = self._get_game_or_abort(game_uuid)
 
+        logger.debug('Received request for new a word with args: %s', args)
+
         # TODO: definitely not the best way to check if the game has expired
         # considering the delays and network latency there might be +-2 seconds
         # difference. It's good enough for a casual game though so here we go
