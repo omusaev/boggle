@@ -1,5 +1,16 @@
 version: '3'
 services:
+  rabbitmq:
+    image: rabbitmq:3
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 15s
+      retries: 1
   database:
     image: postgres
     environment:
@@ -8,6 +19,11 @@ services:
       - POSTGRES_DB=boggle
     volumes:
       - /var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5432" ]
+      interval: 5s
+      timeout: 15s
+      retries: 1
   backend:
     image: boggle-backend:latest
     build:
@@ -16,10 +32,28 @@ services:
     environment:
       - APP_ENVIRONMENT_NAME=production
       - DB_CONNECTION_URL=postgresql://boggle:boggle@database:5432/boggle
+      - TASKS_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+#      - LOGGING_LEVEL=DEBUG
     ports:
       - "8080:8080"
     depends_on:
       - database
+      - rabbitmq
+  bogglesolver:
+    image: boggle-backend-job:latest
+    build:
+      context: ${PWD-.}/../../
+      dockerfile: ${PWD-.}/../images/backend-job/Dockerfile
+    environment:
+      - TASKS_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - DB_CONNECTION_URL=postgresql://boggle:boggle@database:5432/boggle
+      - HANDLER_NAME=boggle_solver
+#      - LOGGING_LEVEL=DEBUG
+    volumes:
+      - ${PWD-.}/../../src/backend/:/app/
+    depends_on:
+      - database
+      - rabbitmq
   frontend:
     image: boggle-frontend:latest
     build:

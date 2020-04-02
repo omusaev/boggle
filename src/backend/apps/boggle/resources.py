@@ -11,6 +11,8 @@ from apps.boggle.board import (
 from apps.boggle.models import BoardCombination, Game
 
 from core.models.database import add_data, commit_data
+from core.tasks.config import get_task_manager, TaskTypes
+
 from conf import settings
 
 from logging import getLogger
@@ -20,13 +22,15 @@ logger = getLogger(__name__)
 
 new_game_parser = reqparse.RequestParser(bundle_errors=True)
 new_game_parser.add_argument('player_name', required=False)
-new_game_parser.add_argument('combination_id', required=False)
+new_game_parser.add_argument('combination_id', dest='combination_uuid',
+                             required=False)
 
 new_word_parser = reqparse.RequestParser(bundle_errors=True)
 new_word_parser.add_argument('word', required=True)
 
 games_list_parser = reqparse.RequestParser(bundle_errors=True)
-games_list_parser.add_argument('combination_id', required=True)
+games_list_parser.add_argument('combination_id', dest='combination_uuid',
+                               required=True)
 
 word_fields = {
     'word': fields.String,
@@ -35,8 +39,8 @@ word_fields = {
 }
 
 game_fields = {
-    'uuid': fields.String,
-    'combination_id': fields.String(attribute='board_combination.id'),
+    'id': fields.String(attribute='uuid'),
+    'combination_id': fields.String(attribute='board_combination.uuid'),
     'letters': fields.List(fields.String, attribute='board_combination.letters'),
     'player_name': fields.String,
     'created_at': fields.DateTime(dt_format='rfc822'),
@@ -65,28 +69,34 @@ class ErrorCodes:
 
 class GameListResource(Resource):
 
+    def _get_combination_or_abort(self, combination_uuid):
+        combination = BoardCombination.query. \
+            filter_by(uuid=combination_uuid).first()
+
+        if not combination:
+            abort(
+                400,
+                error_message='Combination with id {} does not exist'.
+                    format(combination_uuid),
+                error_code=ErrorCodes.COMBINATION_DOES_NOT_EXIST
+            )
+
+        return combination
+
     @marshal_with(game_fields)
     def post(self):
         args = new_game_parser.parse_args()
 
         player_name = args.get('player_name')
-        combination_id = args.get('combination_id')
+        combination_uuid = args.get('combination_uuid')
 
         logger.debug('Received request for a new game with args: %s', args)
 
-        if combination_id:
-            combination = BoardCombination.query.get(combination_id)
-
-            if not combination:
-                abort(
-                    400,
-                    error_message='Combination with id {} does not exist'.
-                                  format(combination_id),
-                    error_code=ErrorCodes.COMBINATION_DOES_NOT_EXIST
-                )
+        if combination_uuid:
+            combination = self._get_combination_or_abort(combination_uuid)
         else:
             letters = CombinationGenerator().new()
-            combination = BoardCombination(letters=letters)
+            combination = BoardCombination(letters=letters, words={})
 
             add_data(combination)
 
@@ -100,17 +110,20 @@ class GameListResource(Resource):
         add_data(new_game)
         commit_data()
 
+        get_task_manager().async_task(TaskTypes.SOLVE_BOGGLE).send({
+            'game_id': new_game.id,
+        })
+
         return new_game, 201
 
     @marshal_with(games_list_fields)
     def get(self):
         args = games_list_parser.parse_args()
-        combination_id = args['combination_id']
+        combination_uuid = args['combination_uuid']
 
-        games = Game.query.filter_by(board_combination_id=combination_id).\
-            order_by(Game.final_score.desc()).all()
+        combination = self._get_combination_or_abort(combination_uuid)
 
-        return {'games': games}
+        return {'games': combination.games}
 
 
 class GameResource(Resource):
@@ -121,7 +134,7 @@ class GameResource(Resource):
         if not game:
             abort(
                 400,
-                error_message='Game with uuid {} does not exist'.
+                error_message='Game with id {} does not exist'.
                     format(game_uuid),
                 error_code=ErrorCodes.GAME_DOES_NOT_EXIST
             )

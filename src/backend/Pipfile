@@ -13,6 +13,7 @@ python-json-logger = "*"
 alembic = "*"
 SQLAlchemy = "*"
 psycopg2 = "*"
+kombu = "*"
 
 [requires]
 python_version = "3.6"

@@ -75,8 +75,8 @@ class TestApi(TestCase):
         response, actual_data = self._create_game()
 
         expected_data = {
-            'uuid': ANY,
-            'combination_id': '1',
+            'id': ANY,
+            'combination_id': ANY,
             'letters': self.fake_combination,
             'player_name': self.fake_player_name,
             'created_at': ANY,
@@ -95,7 +95,7 @@ class TestApi(TestCase):
         )
 
         expected_data = {
-            'uuid': ANY,
+            'id': ANY,
             'combination_id': first_game['combination_id'],
             'letters': first_game['letters'],
             'player_name': self.fake_player_name,
@@ -114,13 +114,13 @@ class TestApi(TestCase):
         expected_score = 1
 
         response, actual_data = self._request(
-            '/api/v1/games/{}'.format(game['uuid']),
+            '/api/v1/games/{}'.format(game['id']),
             'post',
             {'word': valid_word}
         )
 
         expected_data = {
-            'uuid': game['uuid'],
+            'id': game['id'],
             'combination_id': game['combination_id'],
             'letters': game['letters'],
             'player_name': self.fake_player_name,
@@ -144,7 +144,7 @@ class TestApi(TestCase):
         invalid_sequence = 'zero'
 
         response, actual_data = self._request(
-            '/api/v1/games/{}'.format(game['uuid']),
+            '/api/v1/games/{}'.format(game['id']),
             'post',
             {'word': invalid_sequence}
         )
@@ -163,7 +163,7 @@ class TestApi(TestCase):
         fake_word = 'aoe'
 
         response, actual_data = self._request(
-            '/api/v1/games/{}'.format(game['uuid']),
+            '/api/v1/games/{}'.format(game['id']),
             'post',
             {'word': fake_word}
         )
@@ -182,13 +182,13 @@ class TestApi(TestCase):
         valid_word = 'west'
 
         self._request(
-            '/api/v1/games/{}'.format(game['uuid']),
+            '/api/v1/games/{}'.format(game['id']),
             'post',
             {'word': valid_word}
         )
 
         response, actual_data = self._request(
-            '/api/v1/games/{}'.format(game['uuid']),
+            '/api/v1/games/{}'.format(game['id']),
             'post',
             {'word': valid_word}
         )
@@ -209,7 +209,7 @@ class TestApi(TestCase):
         # expires right away
         with patch('apps.boggle.resources.settings.GAME_TTL', new=0):
             response, actual_data = self._request(
-                '/api/v1/games/{}'.format(game['uuid']),
+                '/api/v1/games/{}'.format(game['id']),
                 'post',
                 {'word': valid_word}
             )

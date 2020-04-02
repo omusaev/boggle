@@ -59,6 +59,8 @@ LOGGERS = {
     #     'handlers': ['console'],
     #     'level': LOGGING_LEVEL,
     # },
+    'kombu': {'level': 'INFO'},
+    'amqp': {'level': 'INFO'},
 }
 
 LOGGING = {
@@ -66,13 +68,18 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'default': {
-            'format': '%(levelname)s %(name)s %(thread)d [%(asctime)s] %(filename)s:%(lineno)s %(message)s',
+            'format': '%(levelname)s %(name)s %(request_id)s [%(asctime)s] %(filename)s:%(lineno)s %(message)s',
             'datefmt': '%d/%b/%Y:%H:%M:%S %z',
         },
         'json': {
             '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
             'datefmt': '%d/%b/%Y:%H:%M:%S %z',
-            'fmt': '%(levelname)s %(name)s [%(asctime)s] %(pathname)s %(lineno)s %(message)s',
+            'fmt': '%(levelname)s %(name)s %(request_id)s [%(asctime)s] %(pathname)s %(lineno)s %(message)s',
+        },
+    },
+    'filters': {
+        'request_id': {
+            '()': 'core.utils.logging.RequestIdLoggingFilter'
         },
     },
     'handlers': {
@@ -81,6 +88,7 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',
             'formatter': 'default',
+            'filters': ['request_id']
         }
     },
     'loggers': LOGGERS

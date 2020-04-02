@@ -3,12 +3,14 @@ from flask_restful import Api
 
 from apps.boggle.resources import GameResource, GameListResource
 
+from conf import settings
 from core.models.database import init_db
-
-import conf.settings as settings
+from core.tasks.config import init_tasks
+from core.utils.logging import RequestIdMiddleware
 
 
 init_db(settings.DATABASE)
+init_tasks(settings.TASKS_BROKER_URL)
 
 app = Flask(__name__)
 api = Api(app)
@@ -28,6 +30,9 @@ def after_request(response):
     response.headers.add('Expires', '0')
 
     return response
+
+
+app.wsgi_app = RequestIdMiddleware(app.wsgi_app)
 
 
 if __name__ == '__main__':

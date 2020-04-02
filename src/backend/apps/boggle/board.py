@@ -39,11 +39,11 @@ class WordRulesValidatorException(Exception):
     pass
 
 
-class WordRulesValidatorLengthException(Exception):
+class WordRulesValidatorLengthException(WordRulesValidatorException):
     pass
 
 
-class WordRulesValidatorSequenceException(Exception):
+class WordRulesValidatorSequenceException(WordRulesValidatorException):
     pass
 
 

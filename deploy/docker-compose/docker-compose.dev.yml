@@ -1,5 +1,17 @@
 version: '3'
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 15s
+      retries: 1
   backend:
     image: boggle-backend:latest
     build:
@@ -7,10 +19,25 @@ services:
       dockerfile: ${PWD-.}/../images/backend/Dockerfile
     environment:
       - GUNICORN_CMD_ARGS="--reload"
+      - TASKS_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
     volumes:
       - ${PWD-.}/../../src/backend/:/app/
     ports:
       - "8080:8080"
+    depends_on:
+      - rabbitmq
+  bogglesolver:
+    image: boggle-backend-job:latest
+    build:
+      context: ${PWD-.}/../../
+      dockerfile: ${PWD-.}/../images/backend-job/Dockerfile
+    environment:
+      - TASKS_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - HANDLER_NAME=boggle_solver
+    volumes:
+      - ${PWD-.}/../../src/backend/:/app/
+    depends_on:
+      - rabbitmq
   frontend:
     image: boggle-frontend:latest
     build:

@@ -23,7 +23,7 @@ class App extends React.Component {
 
         this.gameTtl = settings.gameTtl;
         this.siteUrl = settings.siteUrl;
-        this.combinaionIfParam = 'c';
+        this.combinationIdParam = 'c';
 
         this.errorMessages = {
             'COMBINATION_DOES_NOT_EXIST': 'The combination does not exist',
@@ -36,7 +36,7 @@ class App extends React.Component {
         };
 
         const urlParams = new URLSearchParams(props.location.search);
-        const combination_id = urlParams.get(this.combinaionIfParam);
+        const combination_id = urlParams.get(this.combinationIdParam);
 
         this.state = {
             gameInProcess: false,
@@ -45,7 +45,7 @@ class App extends React.Component {
             isChallenge: !!combination_id,
             combinationId: combination_id,
             shareLink: '',
-            uuid: '',
+            gameId: '',
             letters: [],
             foundWords: [],
             finalScore: 0,
@@ -158,7 +158,7 @@ class App extends React.Component {
     }
 
     buildShareLink(combinationId) {
-        return `${this.siteUrl}?${this.combinaionIfParam}=${combinationId}`
+        return `${this.siteUrl}?${this.combinationIdParam}=${combinationId}`
     }
 
     handleGameStart(acceptChallenge) {
@@ -188,7 +188,7 @@ class App extends React.Component {
                     gameInProcess: true,
                     gameFinished: false,
                     combinationId: data.combination_id,
-                    uuid: data.uuid,
+                    gameId: data.id,
                     letters: data.letters,
                     foundWords: data.found_words,
                     finalScore: data.final_score,
@@ -208,8 +208,8 @@ class App extends React.Component {
             });
     }
 
-    handleNewWord(word) {
-        const gameUuid = this.state.uuid;
+    handleNewWord() {
+        const gameId = this.state.gameId;
         const currentWord = this.state.currentWord;
 
         const data = {
@@ -218,7 +218,7 @@ class App extends React.Component {
 
         apiClient({
             method: 'post',
-            path: `games/${gameUuid}`,
+            path: `games/${gameId}`,
             data: data
         })
             .then(response => {

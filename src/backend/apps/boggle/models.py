@@ -5,7 +5,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.ext.mutable import MutableList, MutableDict
 
 from core.models.base import Base, generate_uuid
 
@@ -15,7 +15,10 @@ class BoardCombination(Base):
     __tablename__ = 'board_combination'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(32), nullable=False, unique=True,
+                  default=generate_uuid)
     letters = Column(JSON)
+    words = Column(MutableDict.as_mutable(JSON))
     created_at = Column(DateTime, default=datetime.datetime.now)
 
     games = relationship('Game', backref=backref('board_combination'))

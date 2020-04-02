@@ -7,3 +7,5 @@ FLASK['DEBUG'] = True
 DATABASE = {
     'sqlalchemy.url': 'sqlite://'
 }
+
+TASKS_BROKER_URL = 'memory://'
