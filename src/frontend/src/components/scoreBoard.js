@@ -10,11 +10,11 @@ class ScoreBoard extends React.Component {
             <ListItem
                 key={i}
             >
-                <Box display="flex" justifyContent="center">
-                    <Box width={175}>
+                <Box display="flex" justifyContent="left">
+                    <Box width={130}>
                         {game.player_name || 'Anonymous'}
                     </Box>
-                    <Box >
+                    <Box>
                         {game.final_score}
                     </Box>
                 </Box>

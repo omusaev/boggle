@@ -290,7 +290,7 @@ class App extends React.Component {
                     {gameFinished && <Divider variant="middle"/>}
                     {gameFinished &&
                     <Box display="flex" justifyContent="center" pt={2} pb={2}>
-                        <Box width={1 / 2}>
+                        <Box>
                             <ExpansionPanel>
                                 <ExpansionPanelSummary
                                     aria-controls="scoreboard-content"
