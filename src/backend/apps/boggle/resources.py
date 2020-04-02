@@ -8,6 +8,9 @@ from apps.boggle.board import (
     WordScoreCalculator, Dictionary, WordDictionaryValidator,
     WordDictionaryValidatorException
 )
+
+from apps.boggle.errors import ErrorCodes
+from apps.boggle.helpers import get_combination_or_abort, get_game_or_abort
 from apps.boggle.models import BoardCombination, Game
 
 from core.models.database import add_data, commit_data
@@ -32,11 +35,6 @@ games_list_parser = reqparse.RequestParser(bundle_errors=True)
 games_list_parser.add_argument('combination_id', dest='combination_uuid',
                                required=True)
 
-word_fields = {
-    'word': fields.String,
-    'score': fields.Integer,
-    'path': fields.List(fields.Integer)
-}
 
 game_fields = {
     'id': fields.String(attribute='uuid'),
@@ -44,7 +42,11 @@ game_fields = {
     'letters': fields.List(fields.String, attribute='board_combination.letters'),
     'player_name': fields.String,
     'created_at': fields.DateTime(dt_format='rfc822'),
-    'found_words': fields.List(fields.Nested(word_fields)),
+    'found_words': fields.List(fields.Nested({
+        'word': fields.String,
+        'score': fields.Integer,
+        'path': fields.List(fields.Integer)
+    })),
     'final_score': fields.Integer,
 }
 
@@ -55,33 +57,17 @@ games_list_fields = {
     }))
 }
 
-
-class ErrorCodes:
-    COMBINATION_DOES_NOT_EXIST = 'COMBINATION_DOES_NOT_EXIST'
-    GAME_DOES_NOT_EXIST = 'GAME_DOES_NOT_EXIST'
-    GAME_IS_FINISHED = 'GAME_IS_FINISHED'
-    WORD_HAS_BEEN_ADDED_ALREADY = 'WORD_HAS_BEEN_ADDED_ALREADY'
-
-    INCORRECT_LENGTH = 'INCORRECT_LENGTH'
-    INCORRECT_SEQUENCE = 'INCORRECT_SEQUENCE'
-    WORD_DOES_NOT_EXIST = 'WORD_DOES_NOT_EXIST'
+combination_fields = {
+    'id': fields.String(attribute='combination.uuid'),
+    'letters': fields.List(fields.String, attribute='combination.letters'),
+    'words': fields.List(fields.Nested({
+        'word': fields.String,
+        'path': fields.List(fields.Integer)
+    }))
+}
 
 
 class GameListResource(Resource):
-
-    def _get_combination_or_abort(self, combination_uuid):
-        combination = BoardCombination.query. \
-            filter_by(uuid=combination_uuid).first()
-
-        if not combination:
-            abort(
-                400,
-                error_message='Combination with id {} does not exist'.
-                    format(combination_uuid),
-                error_code=ErrorCodes.COMBINATION_DOES_NOT_EXIST
-            )
-
-        return combination
 
     @marshal_with(game_fields)
     def post(self):
@@ -93,7 +79,7 @@ class GameListResource(Resource):
         logger.debug('Received request for a new game with args: %s', args)
 
         if combination_uuid:
-            combination = self._get_combination_or_abort(combination_uuid)
+            combination = get_combination_or_abort(combination_uuid)
         else:
             letters = CombinationGenerator().new()
             combination = BoardCombination(letters=letters, words={})
@@ -122,29 +108,16 @@ class GameListResource(Resource):
         args = games_list_parser.parse_args()
         combination_uuid = args['combination_uuid']
 
-        combination = self._get_combination_or_abort(combination_uuid)
+        combination = get_combination_or_abort(combination_uuid)
 
         return {'games': combination.games}
 
 
 class GameResource(Resource):
 
-    def _get_game_or_abort(self, game_uuid):
-        game = Game.query.filter_by(uuid=game_uuid).first()
-
-        if not game:
-            abort(
-                400,
-                error_message='Game with id {} does not exist'.
-                    format(game_uuid),
-                error_code=ErrorCodes.GAME_DOES_NOT_EXIST
-            )
-
-        return game
-
     @marshal_with(game_fields)
     def get(self, game_uuid):
-        game = self._get_game_or_abort(game_uuid)
+        game = get_game_or_abort(game_uuid)
 
         return game
 
@@ -159,7 +132,7 @@ class GameResource(Resource):
         args = new_word_parser.parse_args()
         new_word = args['word'].upper()
 
-        game = self._get_game_or_abort(game_uuid)
+        game = get_game_or_abort(game_uuid)
 
         logger.debug('Received request for new a word with args: %s', args)
 
@@ -247,3 +220,18 @@ class GameResource(Resource):
             )
 
         return path
+
+
+class CombinationResource(Resource):
+
+    @marshal_with(combination_fields)
+    def get(self, combination_uuid):
+        combination = get_combination_or_abort(combination_uuid)
+
+        data = {
+            'combination': combination,
+            'words': [{'word': w, 'path': v['path']}
+                      for w, v in combination.words.items()]
+        }
+
+        return data

@@ -1,7 +1,9 @@
 from flask import Flask
 from flask_restful import Api
 
-from apps.boggle.resources import GameResource, GameListResource
+from apps.boggle.resources import (
+    GameResource, GameListResource, CombinationResource
+)
 
 from conf import settings
 from core.models.database import init_db
@@ -17,6 +19,7 @@ api = Api(app)
 
 api.add_resource(GameListResource, '/api/v1/games')
 api.add_resource(GameResource, '/api/v1/games/<game_uuid>')
+api.add_resource(CombinationResource, '/api/v1/combinations/<combination_uuid>')
 
 
 @app.after_request

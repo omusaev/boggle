@@ -1,7 +1,7 @@
 from kombu import Message
 
 from apps.boggle.board import (
-    Dictionary, WordSequenceValidator, WordRulesException
+    Dictionary, WordSequenceValidator, WordRulesException, WordLengthValidator,
 )
 from apps.boggle.models import BoardCombination
 from conf import settings
@@ -23,14 +23,16 @@ class BoggleSolverJob(BaseConsumer):
         combination = BoardCombination.query.get(combination_id)
 
         letters = combination.letters
-        validator = WordSequenceValidator(combination=letters)
+        sequence_validator = WordSequenceValidator(combination=letters)
+        length_validator = WordLengthValidator()
         dictionary = Dictionary(settings.BOGGLE_DICTIONARY_PATH)
 
         found_words = {}
 
         for word in dictionary.words:
             try:
-                path = validator.validate(word)
+                length_validator.validate(word)
+                path = sequence_validator.validate(word)
                 found_words[word] = {'path': path}
             except WordRulesException:
                 pass

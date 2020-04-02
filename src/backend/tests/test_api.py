@@ -250,3 +250,21 @@ class TestApi(TestCase):
 
         self.assertDictEqual(expected_data, actual_data)
         self.assertEqual(response.status_code, 200)
+
+    def test_if_combination_response_format_is_correct(self):
+        _, game = self._create_game()
+
+        response, actual_data = self._request(
+            '/api/v1/combinations/{}'.format(game['combination_id']),
+            'get',
+            {}
+        )
+
+        expected_data = {
+            'id': game['combination_id'],
+            'letters': self.fake_combination,
+            'words': ANY  # TODO: check words structure
+        }
+
+        self.assertDictEqual(expected_data, actual_data)
+        self.assertEqual(response.status_code, 200)
