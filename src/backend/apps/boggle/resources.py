@@ -3,8 +3,8 @@ import datetime
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
 
 from apps.boggle.board import (
-    CombinationGenerator, WordRulesValidator,
-    WordRulesValidatorLengthException, WordRulesValidatorSequenceException,
+    CombinationGenerator, WordSequenceValidator, WordLengthValidator,
+    WordRulesLengthException, WordRulesSequenceException,
     WordScoreCalculator, Dictionary, WordDictionaryValidator,
     WordDictionaryValidatorException
 )
@@ -110,9 +110,10 @@ class GameListResource(Resource):
         add_data(new_game)
         commit_data()
 
-        get_task_manager().async_task(TaskTypes.SOLVE_BOGGLE).send({
-            'game_id': new_game.id,
-        })
+        if not new_game.board_combination.words:
+            get_task_manager().async_task(TaskTypes.SOLVE_BOGGLE).send({
+                'combination_id': new_game.board_combination.id,
+            })
 
         return new_game, 201
 
@@ -186,30 +187,53 @@ class GameResource(Resource):
         return game, 201
 
     def _validate_new_word_and_abort_if_invalid(self, game, new_word):
+        # first of all, let's check if have added the word already or not
         if new_word in (word['word'] for word in game.found_words):
             abort(
                 400,
                 error_message='The word has been added already',
                 error_code=ErrorCodes.WORD_HAS_BEEN_ADDED_ALREADY
             )
-
-        rules_validator = WordRulesValidator(game.board_combination.letters)
+        # the next cheapest validation is length validation
+        length_validator = WordLengthValidator()
 
         try:
-            path = rules_validator.validate(new_word)
-        except WordRulesValidatorLengthException as e:
+            path = length_validator.validate(new_word)
+        except WordRulesLengthException as e:
             abort(
                 400,
                 error_message=str(e),
                 error_code=ErrorCodes.INCORRECT_LENGTH
             )
-        except WordRulesValidatorSequenceException as e:
+
+        # ok, let's check the combination, maybe the background boggle
+        # solver has solved it already
+        if game.board_combination.words:
+            word = game.board_combination.words.get(new_word)
+
+            # if it's not there the only possible reason is that the sequence
+            # is invalid
+            if not word:
+                abort(400, error_code=ErrorCodes.INCORRECT_SEQUENCE)
+
+            logger.debug('Found the word in combination.words')
+            return word['path']
+
+        # ok, background solver is still working, let's check the word
+        # ourselves
+        sequence_validator = WordSequenceValidator(game.board_combination.letters)
+
+        try:
+            path = sequence_validator.validate(new_word)
+        except WordRulesSequenceException as e:
             abort(
                 400,
                 error_message=str(e),
                 error_code=ErrorCodes.INCORRECT_SEQUENCE
             )
 
+        # ok, the sequence is present on the board, let's check
+        # if it's a real word
         dictionary = Dictionary(settings.BOGGLE_DICTIONARY_PATH)
         dictionary_validator = WordDictionaryValidator(dictionary)
 

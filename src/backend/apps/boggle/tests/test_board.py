@@ -2,8 +2,8 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from apps.boggle.board import (
-    CombinationGenerator, WordRulesValidator,
-    WordRulesValidatorLengthException, WordRulesValidatorSequenceException,
+    CombinationGenerator, WordSequenceValidator, WordLengthValidator,
+    WordRulesLengthException, WordRulesSequenceException,
     WordScoreCalculator, Dictionary, WordDictionaryValidatorException,
     WordDictionaryValidator
 )
@@ -34,7 +34,25 @@ class TestCombinationGenerator(TestCase):
         assert generator.new() != generator.new()
 
 
-class TestWordRulesValidator(TestCase):
+class TestWordLengthValidator(TestCase):
+
+    def setUp(self):
+        self.validator = WordLengthValidator()
+
+    def test_if_check_length_checks_min_length(self):
+        word = 'a' * (self.validator.min_length - 1)
+
+        with self.assertRaises(WordRulesLengthException):
+            self.validator.validate(word)
+
+    def test_if_check_length_checks_max_length(self):
+        word = 'a' * (self.validator.max_length + 1)
+
+        with self.assertRaises(WordRulesLengthException):
+            self.validator.validate(word)
+
+
+class TestWordSequenceValidator(TestCase):
 
     def setUp(self):
         combination = [
@@ -43,44 +61,22 @@ class TestWordRulesValidator(TestCase):
             "E", "D", "T", "Z",
             "W", "S", "O", "H"
         ]
-        self.validator = WordRulesValidator(combination=combination)
+        self.validator = WordSequenceValidator(combination=combination)
 
     def test_if_fails_with_invalid_parameters(self):
         size = 4
         combination = 'abcd'
 
         with self.assertRaises(AssertionError):
-            WordRulesValidator(combination=combination, board_size=size)
-
-    def test_if_validate_calls_check_length(self):
-        word = Mock()
-
-        with patch.object(self.validator, '_check_length') as mocked:
-            with patch.object(self.validator, '_check_sequence') as _:
-                self.validator.validate(word)
-
-        mocked.assert_called_with(word)
+            WordSequenceValidator(combination=combination, board_size=size)
 
     def test_if_validate_calls_check_sequence(self):
         word = Mock()
 
         with patch.object(self.validator, '_check_sequence') as mocked:
-            with patch.object(self.validator, '_check_length') as _:
-                self.validator.validate(word)
+            self.validator.validate(word)
 
         mocked.assert_called_with(word)
-
-    def test_if_check_length_checks_min_length(self):
-        word = 'a' * (self.validator.min_length - 1)
-
-        with self.assertRaises(WordRulesValidatorLengthException):
-            self.validator._check_length(word)
-
-    def test_if_check_length_checks_max_length(self):
-        word = 'a' * (self.validator.board_size ** 2 + 1)
-
-        with self.assertRaises(WordRulesValidatorLengthException):
-            self.validator._check_length(word)
 
     def test_if_find_neighbors_returns_all_neighbors(self):
         """
@@ -263,7 +259,7 @@ class TestWordRulesValidator(TestCase):
         word = 'OA'
 
         with patch.object(self.validator, '_find_path', return_value=False) as mocked:
-            with self.assertRaises(WordRulesValidatorSequenceException):
+            with self.assertRaises(WordRulesSequenceException):
                 self.validator._check_sequence(word)
 
 

@@ -35,30 +35,49 @@ class CombinationGenerator:
         return letters
 
 
-class WordRulesValidatorException(Exception):
+class WordRulesException(Exception):
     pass
 
 
-class WordRulesValidatorLengthException(WordRulesValidatorException):
+class WordRulesLengthException(WordRulesException):
     pass
 
 
-class WordRulesValidatorSequenceException(WordRulesValidatorException):
+class WordRulesSequenceException(WordRulesException):
     pass
 
 
-class WordRulesValidator:
+class WordLengthValidator:
 
     DEFAULT_MIN_LENGTH = 3
+    DEFAULT_MAX_LENGTH = 16
+
+    min_length = None
+    max_length = None
+
+    def __init__(self, min_length=None, max_length=None):
+        self.min_length = min_length if min_length is not None else self.DEFAULT_MIN_LENGTH
+        self.max_length = max_length if max_length is not None else self.DEFAULT_MAX_LENGTH
+
+    def validate(self, word):
+        word_length = len(word)
+
+        if word_length < self.min_length or word_length > self.max_length:
+            raise WordRulesLengthException(
+                'Length must be between {} and {}'.format(self.min_length,
+                                                          self.max_length)
+            )
+
+
+class WordSequenceValidator:
+
     DEFAULT_BOARD_SIZE = 4
 
     combination = None
     board_size = None
-    min_length = None
 
-    def __init__(self, combination, min_length=None, board_size=None):
+    def __init__(self, combination, board_size=None):
         self.combination = combination
-        self.min_length = min_length if min_length is not None else self.DEFAULT_MIN_LENGTH
         self.board_size = board_size if board_size is not None else self.DEFAULT_BOARD_SIZE
 
         assert len(self.combination) == self.board_size ** 2
@@ -78,20 +97,9 @@ class WordRulesValidator:
             If the word is valid return first found valid path on the board
         """
 
-        self._check_length(word)
         path = self._check_sequence(word)
 
         return path
-
-    def _check_length(self, word):
-        word_length = len(word)
-        max_length = self.board_size ** 2
-
-        if word_length < self.min_length or word_length > max_length:
-            raise WordRulesValidatorLengthException(
-                'Length must be between {} and {}'.format(self.min_length,
-                                                          max_length)
-            )
 
     def _find_neighbors(self, pos):
         x, y = pos
@@ -175,7 +183,7 @@ class WordRulesValidator:
                 # now let's go back to indexes
                 return [y * self.board_size + x for (x, y) in stack]
 
-        raise WordRulesValidatorSequenceException(
+        raise WordRulesSequenceException(
             'The word is not present on the board'
         )
 

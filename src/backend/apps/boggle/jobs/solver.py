@@ -1,9 +1,9 @@
 from kombu import Message
 
 from apps.boggle.board import (
-    Dictionary, WordRulesValidator, WordRulesValidatorException
+    Dictionary, WordSequenceValidator, WordRulesException
 )
-from apps.boggle.models import Game
+from apps.boggle.models import BoardCombination
 from conf import settings
 from core.tasks.consumer import BaseConsumer
 from core.models.database import add_data
@@ -18,11 +18,12 @@ class BoggleSolverJob(BaseConsumer):
 
     def process_message(self, message: Message):
         data = message.payload
-        game_id = data['game_id']
+        combination_id = data['combination_id']
 
-        game = Game.query.get(game_id)
-        letters = game.board_combination.letters
-        validator = WordRulesValidator(combination=letters)
+        combination = BoardCombination.query.get(combination_id)
+
+        letters = combination.letters
+        validator = WordSequenceValidator(combination=letters)
         dictionary = Dictionary(settings.BOGGLE_DICTIONARY_PATH)
 
         found_words = {}
@@ -31,12 +32,12 @@ class BoggleSolverJob(BaseConsumer):
             try:
                 path = validator.validate(word)
                 found_words[word] = {'path': path}
-            except WordRulesValidatorException:
+            except WordRulesException:
                 pass
 
         logger.debug('Letters: %s', letters)
         logger.debug('Found words (%s), %s', len(found_words), found_words)
 
-        game.board_combination.words = found_words
+        combination.words = found_words
 
-        add_data(game, commit=True)
+        add_data(combination, commit=True)
